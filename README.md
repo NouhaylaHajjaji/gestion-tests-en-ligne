@@ -51,17 +51,6 @@ Permettre aux candidats de s'inscrire, choisir des créneaux horaires, passer de
 - **MySQL** : Utilisateur root/root
 - **Apache** : Virtual Host pour phpMyAdmin
 
-## 📊 Diagrammes UML
-
-### Diagramme de Cas d'Utilisation
-![Cas d'utilisation](diagrammes/cas_utilisation.png)
-
-### Diagramme de Classes
-![Classes](diagrammes/classes.png)
-
-### Diagramme de Déploiement
-![Déploiement](diagrammes/deployment.png)
-
 ## 🎬 Démo Vidéo
 
 [📹 Lien vers la vidéo explicative](lien-video-ici)
