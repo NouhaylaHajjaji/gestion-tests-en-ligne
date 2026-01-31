@@ -82,12 +82,13 @@ docs/generated/
 deploy_*.bat
 test_*.json
 
-# Documentation secondaire (garder seulement README et SCRIPT_VIDEO)
+# Documentation secondaire (garder seulement README)
 CODE_SESSION_GUIDE.md
 DEPLOIEMENT_*.md
 PROCESSUS_*.md
 TEST_GUIDE.md
 TROUBLESHOOTING_*.md
+SCRIPT_VIDEO.md
 
 # Diagrammes UML (masqués du dépôt)
 *.uml
@@ -102,4 +103,3 @@ DIAGRAMMES_*.md
 
 # Fichiers essentiels à garder
 !README.md
-!SCRIPT_VIDEO.md
