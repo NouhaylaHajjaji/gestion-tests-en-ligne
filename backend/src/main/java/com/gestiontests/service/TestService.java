@@ -39,6 +39,9 @@ public class TestService {
     @Inject
     private ParametreRepository parametreRepository;
     
+    @Inject
+    private InscriptionRepository inscriptionRepository;
+    
     @PersistenceContext
     private EntityManager entityManager;
     
@@ -107,6 +110,20 @@ public class TestService {
         sessionTest.setCandidat(candidat);
         sessionTest.setCodeSession(codeSession);
         sessionTest.setScoreMax(questions.size());
+        
+        // Récupérer le créneau horaire depuis l'inscription du candidat
+        List<Inscription> inscriptions = inscriptionRepository.findByCandidat(candidat.getId());
+        if (!inscriptions.isEmpty()) {
+            sessionTest.setCreneau(inscriptions.get(0).getCreneau());
+            System.out.println("🎬 [DEMO] Créneau associé: " + inscriptions.get(0).getCreneau().getId());
+        } else {
+            System.out.println("🎬 [DEMO] Aucun créneau trouvé - utilisation d'un créneau par défaut");
+            // En mode démo, créer un créneau par défaut
+            CreneauHoraire creneauParDefaut = new CreneauHoraire();
+            creneauParDefaut.setId(1); // ID par défaut
+            sessionTest.setCreneau(creneauParDefaut);
+        }
+        
         sessionTest.demarrerSession();
         
         SessionTest savedSession = sessionTestRepository.create(sessionTest);
@@ -117,14 +134,13 @@ public class TestService {
         for (int i = 0; i < questions.size(); i++) {
             SessionQuestion sessionQuestion = questions.get(i);
             
-            // Utiliser SQL natif pour insérer avec les deux champs
-            String sql = "INSERT INTO session_questions (ordre_affichage, id_question, id_session, id_session_test, temps_alloue) VALUES (?, ?, ?, ?, ?)";
+            // Utiliser SQL natif pour insérer avec les bons champs
+            String sql = "INSERT INTO session_questions (ordre_affichage, id_question, id_session_test, temps_alloue) VALUES (?, ?, ?, ?)";
             entityManager.createNativeQuery(sql)
                 .setParameter(1, i + 1)
                 .setParameter(2, sessionQuestion.getQuestion().getId())
                 .setParameter(3, savedSession.getId())
-                .setParameter(4, savedSession.getId())
-                .setParameter(5, sessionQuestion.getTempsAlloue())
+                .setParameter(4, sessionQuestion.getTempsAlloue())
                 .executeUpdate();
         }
         
@@ -321,8 +337,14 @@ public class TestService {
             }
         } else if (reponseData.containsKey("reponseText")) {
             // Réponse textuelle
-            reponse.setReponseText((String) reponseData.get("reponseText"));
-            reponse.setEstCorrect(false); // Les réponses textuelles ne sont pas auto-évaluées
+            String reponseText = (String) reponseData.get("reponseText");
+            reponse.setReponseText(reponseText);
+            
+            // Évaluer automatiquement la réponse textuelle
+            boolean estCorrect = evaluerReponseTextuelle(sessionQuestion.getQuestion(), reponseText);
+            reponse.setEstCorrect(estCorrect);
+            
+            System.out.println("🎬 [DEMO] Réponse textuelle évaluée: '" + reponseText + "' -> " + (estCorrect ? "CORRECT" : "INCORRECT"));
         }
         
         if (reponseData.containsKey("tempsReponse")) {
@@ -343,9 +365,15 @@ public class TestService {
                 reponse.setReponseText(null);
             }
         } else if (reponseData.containsKey("reponseText")) {
-            reponse.setReponseText((String) reponseData.get("reponseText"));
+            String reponseText = (String) reponseData.get("reponseText");
+            reponse.setReponseText(reponseText);
             reponse.setReponsePossible(null);
-            reponse.setEstCorrect(false); // Les réponses textuelles ne sont pas auto-évaluées
+            
+            // Évaluer automatiquement la réponse textuelle
+            boolean estCorrect = evaluerReponseTextuelle(reponse.getSessionQuestion().getQuestion(), reponseText);
+            reponse.setEstCorrect(estCorrect);
+            
+            System.out.println("🎬 [DEMO] Réponse textuelle mise à jour: '" + reponseText + "' -> " + (estCorrect ? "CORRECT" : "INCORRECT"));
         }
         
         if (reponseData.containsKey("tempsReponse")) {
@@ -384,5 +412,81 @@ public class TestService {
         }
         
         return java.time.Duration.between(maintenant, finEstimee).getSeconds();
+    }
+    
+    /**
+     * Évalue une réponse textuelle en la comparant avec les réponses correctes
+     */
+    private boolean evaluerReponseTextuelle(Question question, String reponseText) {
+        if (reponseText == null || reponseText.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Normaliser la réponse du candidat
+        String reponseNormalisee = reponseText.trim().toLowerCase();
+        
+        // Récupérer toutes les réponses possibles pour cette question
+        List<ReponsePossible> reponsesPossibles = reponsePossibleRepository.findByQuestion(question.getId());
+        
+        for (ReponsePossible reponsePossible : reponsesPossibles) {
+            if (reponsePossible.getEstCorrect() != null && reponsePossible.getEstCorrect()) {
+                // Normaliser la réponse correcte
+                String reponseCorrecteNormalisee = reponsePossible.getLibelle().trim().toLowerCase();
+                
+                // Comparaison exacte
+                if (reponseNormalisee.equals(reponseCorrecteNormalisee)) {
+                    System.out.println("🎬 [DEMO] Correspondance exacte trouvée: '" + reponseText + "' == '" + reponsePossible.getLibelle() + "'");
+                    return true;
+                }
+                
+                // Comparaison partielle (contient)
+                if (reponseNormalisee.contains(reponseCorrecteNormalisee) || reponseCorrecteNormalisee.contains(reponseNormalisee)) {
+                    System.out.println("🎬 [DEMO] Correspondance partielle trouvée: '" + reponseText + "' ~ '" + reponsePossible.getLibelle() + "'");
+                    return true;
+                }
+                
+                // Comparaison par mots-clés (sépare en mots et vérifie si les mots-clés importants sont présents)
+                if (comparerParMotsCles(reponseNormalisee, reponseCorrecteNormalisee)) {
+                    System.out.println("🎬 [DEMO] Correspondance par mots-clés trouvée: '" + reponseText + "' ≈ '" + reponsePossible.getLibelle() + "'");
+                    return true;
+                }
+            }
+        }
+        
+        System.out.println("🎬 [DEMO] Aucune correspondance trouvée pour: '" + reponseText + "'");
+        return false;
+    }
+    
+    /**
+     * Compare deux réponses en se basant sur les mots-clés importants
+     */
+    private boolean comparerParMotsCles(String reponse1, String reponse2) {
+        // Extraire les mots-clés (mots de plus de 3 caractères)
+        String[] mots1 = reponse1.split("\\s+");
+        String[] mots2 = reponse2.split("\\s+");
+        
+        int motsCommuns = 0;
+        int totalMotsImportants = 0;
+        
+        // Compter les mots importants dans la réponse correcte
+        for (String mot2 : mots2) {
+            if (mot2.length() > 3) { // Ignorer les mots courts
+                totalMotsImportants++;
+                for (String mot1 : mots1) {
+                    if (mot1.length() > 3 && mot1.equals(mot2)) {
+                        motsCommuns++;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Si au moins 60% des mots importants correspondent
+        if (totalMotsImportants > 0) {
+            double pourcentage = (double) motsCommuns / totalMotsImportants;
+            return pourcentage >= 0.6;
+        }
+        
+        return false;
     }
 }

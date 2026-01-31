@@ -34,6 +34,9 @@ public class CandidatService {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int CODE_LENGTH = 8;
     
+    // Mode démo pour permettre les tests en dehors des créneaux horaires
+    private final boolean DEMO_MODE = true;
+    
     @Transactional
     public Candidat inscrireCandidat(Candidat candidat, Integer creneauId) throws Exception {
         // Vérifier si l'email existe déjà
@@ -170,6 +173,12 @@ public class CandidatService {
      */
     @Transactional
     public boolean peutPasserTest(String codeSession) {
+        // Mode démo : autoriser tous les tests
+        if (DEMO_MODE) {
+            System.out.println("🎬 [DEMO] Mode démo activé - test autorisé pour code: " + codeSession);
+            return true;
+        }
+        
         Optional<Candidat> candidatOpt = candidatRepository.findByCodeSession(codeSession);
         if (candidatOpt.isEmpty()) {
             return false;

@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.Response;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +35,9 @@ public class ResultatResource {
         private Integer scoreTotal;
         private Integer scoreMax;
         private String pourcentage;
+        private Integer questionsCorrectes;
+        private Integer questionsIncorrectes;
+        private String dureeTotale;
         
         public SessionTestDTO(SessionTest session) {
             this.id = session.getId();
@@ -44,6 +48,29 @@ public class ResultatResource {
             this.scoreTotal = session.getScoreTotal();
             this.scoreMax = session.getScoreMax();
             this.pourcentage = session.getPourcentage() != null ? session.getPourcentage().toString() : "0.00";
+            
+            // Calculer les réponses correctes/incorrectes
+            this.questionsCorrectes = session.getScoreTotal() != null ? session.getScoreTotal() : 0;
+            this.questionsIncorrectes = session.getScoreMax() != null && session.getScoreTotal() != null ? 
+                session.getScoreMax() - session.getScoreTotal() : 0;
+            
+            // Calculer la durée
+            this.dureeTotale = calculateDuree(session);
+        }
+        
+        private String calculateDuree(SessionTest session) {
+            if (session.getDateDebut() == null) return "N/A";
+            
+            LocalDateTime fin = session.getDateFin() != null ? session.getDateFin() : LocalDateTime.now();
+            long minutes = java.time.Duration.between(session.getDateDebut(), fin).toMinutes();
+            
+            if (minutes < 60) {
+                return minutes + " min";
+            } else {
+                long hours = minutes / 60;
+                long remainingMinutes = minutes % 60;
+                return hours + "h " + remainingMinutes + "min";
+            }
         }
         
         // Getters
@@ -55,6 +82,9 @@ public class ResultatResource {
         public Integer getScoreTotal() { return scoreTotal; }
         public Integer getScoreMax() { return scoreMax; }
         public String getPourcentage() { return pourcentage; }
+        public Integer getQuestionsCorrectes() { return questionsCorrectes; }
+        public Integer getQuestionsIncorrectes() { return questionsIncorrectes; }
+        public String getDureeTotale() { return dureeTotale; }
     }
     
     @Inject
@@ -69,41 +99,67 @@ public class ResultatResource {
     @GET
     @Path("/session/{sessionId}")
     public Response getResultatsBySession(@PathParam("sessionId") Integer sessionId) {
-        Optional<SessionTest> sessionOpt = testService.getSessionById(sessionId);
-        if (sessionOpt.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND)
-                .entity(Map.of("error", "Session de test non trouvée"))
+        try {
+            Optional<SessionTest> sessionOpt = testService.getSessionById(sessionId);
+            if (sessionOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "Session de test non trouvée"))
+                    .build();
+            }
+            
+            SessionTest session = sessionOpt.get();
+            SessionTestDTO sessionDTO = new SessionTestDTO(session);
+            
+            // Récupérer les résultats par thème (temporairement vide)
+            List<Map<String, Object>> resultatsParTheme = new java.util.ArrayList<>();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", sessionDTO.getId());
+            response.put("codeSession", sessionDTO.getCodeSession());
+            response.put("dateDebut", sessionDTO.getDateDebut());
+            response.put("dateFin", sessionDTO.getDateFin());
+            response.put("estTermine", sessionDTO.getEstTermine());
+            response.put("scoreTotal", sessionDTO.getScoreTotal());
+            response.put("scoreMax", sessionDTO.getScoreMax());
+            response.put("pourcentage", sessionDTO.getPourcentage());
+            response.put("questionsCorrectes", sessionDTO.getQuestionsCorrectes());
+            response.put("questionsIncorrectes", sessionDTO.getQuestionsIncorrectes());
+            response.put("dureeTotale", sessionDTO.getDureeTotale());
+            response.put("resultatsParTheme", resultatsParTheme);
+            
+            return Response.ok(response).build();
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la récupération des résultats: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(Map.of("error", "Erreur lors de la récupération des résultats: " + e.getMessage()))
                 .build();
         }
-        
-        SessionTest session = sessionOpt.get();
-        List<ReponseCandidat> reponses = reponseCandidatRepository.findBySession(sessionId);
-        
-        return Response.ok(Map.of(
-            "session", session,
-            "reponses", reponses,
-            "score", Map.of(
-                "total", session.getScoreTotal(),
-                "max", session.getScoreMax(),
-                "pourcentage", session.getPourcentage()
-            )
-        )).build();
     }
     
     @GET
     @Path("/candidat/{candidatId}")
     public Response getResultatsByCandidat(@PathParam("candidatId") Integer candidatId) {
-        List<SessionTest> sessions = testService.getSessionsByCandidat(candidatId);
-        List<SessionTestDTO> sessionDTOs = sessions.stream()
-            .map(SessionTestDTO::new)
-            .collect(Collectors.toList());
-        
-        return Response.ok(Map.of(
-            "candidatId", candidatId,
-            "sessions", sessionDTOs,
-            "totalSessions", sessionDTOs.size(),
-            "sessionsTerminees", sessionDTOs.stream().mapToLong(s -> s.getEstTermine() ? 1 : 0).sum()
-        )).build();
+        try {
+            List<SessionTest> sessions = testService.getSessionsByCandidat(candidatId);
+            List<SessionTestDTO> sessionDTOs = sessions.stream()
+                .map(SessionTestDTO::new)
+                .collect(Collectors.toList());
+            
+            return Response.ok(Map.of(
+                "candidatId", candidatId,
+                "sessions", sessionDTOs,
+                "totalSessions", sessionDTOs.size(),
+                "sessionsTerminees", sessionDTOs.stream().mapToLong(s -> s.getEstTermine() ? 1 : 0).sum()
+            )).build();
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la récupération des résultats du candidat: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(Map.of("error", "Erreur lors de la récupération des résultats: " + e.getMessage()))
+                .build();
+        }
     }
     
     @GET
@@ -315,5 +371,89 @@ public class ResultatResource {
             "premierScore", premierScore,
             "dernierScore", dernierScore
         );
+    }
+    
+    @GET
+    @Path("/rapport/{sessionId}")
+    @Produces("application/pdf")
+    public Response telechargerRapport(@PathParam("sessionId") Integer sessionId) {
+        try {
+            Optional<SessionTest> sessionOpt = testService.getSessionById(sessionId);
+            if (sessionOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "Session de test non trouvée"))
+                    .build();
+            }
+            
+            SessionTest session = sessionOpt.get();
+            
+            // Générer le contenu PDF (simplifié pour le moment)
+            String pdfContent = genererRapportPDF(session);
+            
+            return Response.ok(pdfContent)
+                .type("application/pdf")
+                .header("Content-Disposition", "attachment; filename=\"rapport-test-" + session.getCodeSession() + ".pdf\"")
+                .build();
+                
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la génération du rapport PDF: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(Map.of("error", "Erreur lors de la génération du rapport: " + e.getMessage()))
+                .build();
+        }
+    }
+    
+    private String genererRapportPDF(SessionTest session) {
+        StringBuilder rapport = new StringBuilder();
+        
+        // En-tête du rapport
+        rapport.append("RAPPORT DE TEST\n");
+        rapport.append("================\n\n");
+        
+        // Informations générales
+        rapport.append("Code Session: ").append(session.getCodeSession()).append("\n");
+        rapport.append("Date du test: ").append(session.getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
+        rapport.append("Durée: ").append(calculateDuree(session)).append("\n\n");
+        
+        // Résultats
+        rapport.append("RÉSULTATS\n");
+        rapport.append("----------\n");
+        rapport.append("Score: ").append(session.getScoreTotal()).append("/").append(session.getScoreMax()).append("\n");
+        rapport.append("Pourcentage: ").append(session.getPourcentage()).append("%\n");
+        rapport.append("Statut: ").append(session.getEstTermine() ? "Terminé" : "En cours").append("\n\n");
+        
+        // Performance
+        rapport.append("PERFORMANCE\n");
+        rapport.append("-----------\n");
+        if (session.getPourcentage().doubleValue() >= 80) {
+            rapport.append("Niveau: EXCELLENT 🏆\n");
+        } else if (session.getPourcentage().doubleValue() >= 60) {
+            rapport.append("Niveau: BON 👍\n");
+        } else {
+            rapport.append("Niveau: À AMÉLIORER 📈\n");
+        }
+        
+        // Pied de page
+        rapport.append("\n----------------\n");
+        rapport.append("Généré le: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n");
+        rapport.append("Système de Gestion des Tests en Ligne\n");
+        
+        return rapport.toString();
+    }
+    
+    private String calculateDuree(SessionTest session) {
+        if (session.getDateDebut() == null) return "N/A";
+        
+        LocalDateTime fin = session.getDateFin() != null ? session.getDateFin() : LocalDateTime.now();
+        long minutes = java.time.Duration.between(session.getDateDebut(), fin).toMinutes();
+        
+        if (minutes < 60) {
+            return minutes + " minutes";
+        } else {
+            long hours = minutes / 60;
+            long remainingMinutes = minutes % 60;
+            return hours + "h " + remainingMinutes + "min";
+        }
     }
 }

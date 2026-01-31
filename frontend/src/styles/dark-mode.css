@@ -1,0 +1,386 @@
+/* Dark Mode Styles */
+
+:root {
+  /* Dark Mode Color Palette */
+  --dark-bg-primary: #0f172a;
+  --dark-bg-secondary: #1e293b;
+  --dark-bg-tertiary: #334155;
+  --dark-bg-card: #1e293b;
+  --dark-bg-hover: #334155;
+  
+  --dark-text-primary: #f8fafc;
+  --dark-text-secondary: #e2e8f0;
+  --dark-text-muted: #94a3b8;
+  --dark-text-inverse: #0f172a;
+  
+  --dark-border-primary: #334155;
+  --dark-border-secondary: #475569;
+  --dark-border-accent: #64748b;
+  
+  --dark-primary-50: #eff6ff;
+  --dark-primary-100: #dbeafe;
+  --dark-primary-200: #bfdbfe;
+  --dark-primary-300: #93c5fd;
+  --dark-primary-400: #60a5fa;
+  --dark-primary-500: #3b82f6;
+  --dark-primary-600: #2563eb;
+  --dark-primary-700: #1d4ed8;
+  --dark-primary-800: #1e40af;
+  --dark-primary-900: #1e3a8a;
+
+  --dark-success-50: #f0fdf4;
+  --dark-success-100: #dcfce7;
+  --dark-success-200: #bbf7d0;
+  --dark-success-300: #86efac;
+  --dark-success-400: #4ade80;
+  --dark-success-500: #22c55e;
+  --dark-success-600: #16a34a;
+  --dark-success-700: #15803d;
+  --dark-success-800: #166534;
+  --dark-success-900: #14532d;
+
+  --dark-warning-50: #fffbeb;
+  --dark-warning-100: #fef3c7;
+  --dark-warning-200: #fde68a;
+  --dark-warning-300: #fcd34d;
+  --dark-warning-400: #fbbf24;
+  --dark-warning-500: #f59e0b;
+  --dark-warning-600: #d97706;
+  --dark-warning-700: #b45309;
+  --dark-warning-800: #92400e;
+  --dark-warning-900: #78350f;
+
+  --dark-error-50: #fef2f2;
+  --dark-error-100: #fee2e2;
+  --dark-error-200: #fecaca;
+  --dark-error-300: #fca5a5;
+  --dark-error-400: #f87171;
+  --dark-error-500: #ef4444;
+  --dark-error-600: #dc2626;
+  --dark-error-700: #b91c1c;
+  --dark-error-800: #991b1b;
+  --dark-error-900: #7f1d1d;
+
+  /* Dark Mode Shadows */
+  --dark-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --dark-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --dark-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --dark-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --dark-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --dark-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+}
+
+/* Dark Mode Base Styles */
+.dark {
+  background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
+  color: var(--dark-text-primary);
+}
+
+.dark body {
+  background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
+  color: var(--dark-text-primary);
+}
+
+/* Dark Mode Button Styles */
+.dark .btn-primary {
+  background: linear-gradient(135deg, var(--dark-primary-600), var(--dark-primary-700));
+  color: white;
+  box-shadow: var(--dark-shadow-md);
+}
+
+.dark .btn-primary:hover {
+  background: linear-gradient(135deg, var(--dark-primary-700), var(--dark-primary-800));
+  box-shadow: var(--dark-shadow-lg);
+}
+
+.dark .btn-secondary {
+  background: linear-gradient(135deg, var(--dark-bg-tertiary), var(--dark-border-secondary));
+  color: var(--dark-text-primary);
+  box-shadow: var(--dark-shadow-md);
+}
+
+.dark .btn-secondary:hover {
+  background: linear-gradient(135deg, var(--dark-border-secondary), var(--dark-border-accent));
+  box-shadow: var(--dark-shadow-lg);
+}
+
+.dark .btn-outline {
+  background: transparent;
+  color: var(--dark-primary-500);
+  border: 2px solid var(--dark-primary-500);
+}
+
+.dark .btn-outline:hover {
+  background: var(--dark-primary-500);
+  color: white;
+  box-shadow: var(--dark-shadow-md);
+}
+
+.dark .btn-success {
+  background: linear-gradient(135deg, var(--dark-success-600), var(--dark-success-700));
+  color: white;
+  box-shadow: var(--dark-shadow-md);
+}
+
+.dark .btn-success:hover {
+  background: linear-gradient(135deg, var(--dark-success-700), var(--dark-success-800));
+  box-shadow: var(--dark-shadow-lg);
+}
+
+.dark .btn-warning {
+  background: linear-gradient(135deg, var(--dark-warning-600), var(--dark-warning-700));
+  color: white;
+  box-shadow: var(--dark-shadow-md);
+}
+
+.dark .btn-warning:hover {
+  background: linear-gradient(135deg, var(--dark-warning-700), var(--dark-warning-800));
+  box-shadow: var(--dark-shadow-lg);
+}
+
+.dark .btn-danger {
+  background: linear-gradient(135deg, var(--dark-error-600), var(--dark-error-700));
+  color: white;
+  box-shadow: var(--dark-shadow-md);
+}
+
+.dark .btn-danger:hover {
+  background: linear-gradient(135deg, var(--dark-error-700), var(--dark-error-800));
+  box-shadow: var(--dark-shadow-lg);
+}
+
+/* Dark Mode Card Styles */
+.dark .card {
+  background: var(--dark-bg-card);
+  border: 1px solid var(--dark-border-primary);
+  box-shadow: var(--dark-shadow-lg);
+}
+
+.dark .card:hover {
+  box-shadow: var(--dark-shadow-xl);
+}
+
+.dark .card-header {
+  background: linear-gradient(135deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+  border-bottom: 1px solid var(--dark-border-primary);
+}
+
+.dark .card-body {
+  color: var(--dark-text-primary);
+}
+
+.dark .card-footer {
+  background: var(--dark-bg-secondary);
+  border-top: 1px solid var(--dark-border-primary);
+}
+
+/* Dark Mode Form Styles */
+.dark .form-label {
+  color: var(--dark-text-secondary);
+}
+
+.dark .form-input {
+  background: var(--dark-bg-secondary);
+  border: 2px solid var(--dark-border-primary);
+  color: var(--dark-text-primary);
+}
+
+.dark .form-input:focus {
+  border-color: var(--dark-primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark .form-input::placeholder {
+  color: var(--dark-text-muted);
+}
+
+/* Dark Mode Alert Styles */
+.dark .alert-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--dark-success-400);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.dark .alert-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--dark-warning-400);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.dark .alert-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--dark-error-400);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.dark .alert-info {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--dark-primary-400);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Dark Mode Badge Styles */
+.dark .badge-success {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--dark-success-400);
+}
+
+.dark .badge-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--dark-warning-400);
+}
+
+.dark .badge-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--dark-error-400);
+}
+
+.dark .badge-primary {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--dark-primary-400);
+}
+
+/* Dark Mode Progress Bar */
+.dark .progress {
+  background: var(--dark-border-primary);
+}
+
+.dark .progress-bar {
+  background: linear-gradient(90deg, var(--dark-primary-500), var(--dark-primary-600));
+}
+
+/* Dark Mode Text Utilities */
+.dark .text-primary { color: var(--dark-primary-400); }
+.dark .text-secondary { color: var(--dark-text-secondary); }
+.dark .text-success { color: var(--dark-success-400); }
+.dark .text-warning { color: var(--dark-warning-400); }
+.dark .text-danger { color: var(--dark-error-400); }
+
+.dark .text-gray-900 { color: var(--dark-text-primary); }
+.dark .text-gray-800 { color: var(--dark-text-secondary); }
+.dark .text-gray-700 { color: var(--dark-text-secondary); }
+.dark .text-gray-600 { color: var(--dark-text-muted); }
+.dark .text-gray-500 { color: var(--dark-text-muted); }
+
+/* Dark Mode Background Utilities */
+.dark .bg-primary { background-color: var(--dark-primary-600); }
+.dark .bg-secondary { background-color: var(--dark-bg-tertiary); }
+.dark .bg-success { background-color: var(--dark-success-600); }
+.dark .bg-warning { background-color: var(--dark-warning-600); }
+.dark .bg-danger { background-color: var(--dark-error-600); }
+
+.dark .bg-white { background-color: var(--dark-bg-card); }
+.dark .bg-gray-50 { background-color: var(--dark-bg-secondary); }
+.dark .bg-gray-100 { background-color: var(--dark-bg-tertiary); }
+
+/* Dark Mode Border Utilities */
+.dark .border-gray-200 { border-color: var(--dark-border-primary); }
+.dark .border-gray-300 { border-color: var(--dark-border-secondary); }
+
+/* Dark Mode Hover Effects */
+.dark .hover-lift:hover {
+  box-shadow: var(--dark-shadow-xl);
+}
+
+.dark .hover-glow:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Dark Mode Glass Effect */
+.dark .glass {
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(51, 65, 85, 0.3);
+}
+
+/* Dark Mode Scrollbar */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--dark-bg-secondary);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--dark-border-accent);
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-border-secondary);
+}
+
+/* Dark Mode Selection */
+.dark ::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: var(--dark-text-primary);
+}
+
+/* Dark Mode Focus Styles */
+.dark .focus\:ring-blue-500:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Dark Mode Transitions */
+.dark * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Dark Mode Specific Components */
+.dark .min-h-screen {
+  background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
+}
+
+.dark .bg-gradient-to-br {
+  background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
+}
+
+/* Dark Mode Toggle Animation */
+.dark-mode-toggle {
+  position: relative;
+  width: 60px;
+  height: 30px;
+  background: var(--dark-border-primary);
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dark-mode-toggle::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: var(--dark-shadow-sm);
+}
+
+.dark .dark-mode-toggle {
+  background: var(--dark-primary-600);
+}
+
+.dark .dark-mode-toggle::before {
+  transform: translateX(30px);
+}
+
+/* Dark Mode Icons */
+.dark .sun-icon {
+  display: none;
+}
+
+.dark .moon-icon {
+  display: block;
+}
+
+:not(.dark) .sun-icon {
+  display: block;
+}
+
+:not(.dark) .moon-icon {
+  display: none;
+}

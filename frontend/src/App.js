@@ -12,6 +12,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './contexts/AuthContext';
+import './styles/professional.css';
+import './styles/dark-mode.css';
 
 function App() {
   const { loading } = useAuth();

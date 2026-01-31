@@ -396,12 +396,26 @@ public class TestResource {
                 
                 Map<String, Object> reponseData = new HashMap<>();
                 
-                if (answer instanceof Integer) {
-                    // Réponse à choix (ID de la réponse possible)
+                if (answer instanceof Map) {
+                    // Nouveau format : objet avec reponsePossibleId et/ou reponseText
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> answerMap = (Map<String, Object>) answer;
+                    
+                    if (answerMap.containsKey("reponsePossibleId")) {
+                        reponseData.put("reponsePossibleId", answerMap.get("reponsePossibleId"));
+                        System.out.println("DEBUG: Setting reponsePossibleId = " + answerMap.get("reponsePossibleId"));
+                    }
+                    
+                    if (answerMap.containsKey("reponseText")) {
+                        reponseData.put("reponseText", answerMap.get("reponseText"));
+                        System.out.println("DEBUG: Setting reponseText = " + answerMap.get("reponseText"));
+                    }
+                } else if (answer instanceof Integer) {
+                    // Ancien format : réponse à choix (ID de la réponse possible)
                     reponseData.put("reponsePossibleId", answer);
                     System.out.println("DEBUG: Setting reponsePossibleId = " + answer);
                 } else if (answer instanceof String) {
-                    // Réponse textuelle
+                    // Ancien format : réponse textuelle
                     reponseData.put("reponseText", answer);
                     System.out.println("DEBUG: Setting reponseText = " + answer);
                 } else if (answer instanceof List) {
@@ -447,6 +461,44 @@ public class TestResource {
                 )
             )).build();
         } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(Map.of("error", e.getMessage()))
+                .build();
+        }
+    }
+    
+    @POST
+    @Path("/reponse")
+    public Response enregistrerReponseIndividuelle(Map<String, Object> payload) {
+        try {
+            Integer sessionId = (Integer) payload.get("sessionId");
+            Integer questionId = (Integer) payload.get("questionId");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> reponseData = (Map<String, Object>) payload.get("reponseData");
+            
+            if (sessionId == null || questionId == null || reponseData == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("error", "sessionId, questionId et reponseData sont obligatoires"))
+                    .build();
+            }
+            
+            System.out.println("DEBUG: Enregistrement réponse individuelle - Session: " + sessionId + ", Question: " + questionId + ", Data: " + reponseData);
+            
+            ReponseCandidat reponse = testService.enregistrerReponse(sessionId, questionId, reponseData);
+            
+            return Response.ok(Map.of(
+                "message", "Réponse enregistrée avec succès",
+                "reponse", Map.of(
+                    "id", reponse.getId(),
+                    "estCorrect", reponse.getEstCorrect(),
+                    "reponseText", reponse.getReponseText(),
+                    "reponsePossibleId", reponse.getReponsePossible() != null ? reponse.getReponsePossible().getId() : null
+                )
+            )).build();
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'enregistrement de la réponse: " + e.getMessage());
+            e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST)
                 .entity(Map.of("error", e.getMessage()))
                 .build();

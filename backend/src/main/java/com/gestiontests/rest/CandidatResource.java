@@ -4,6 +4,7 @@ import com.gestiontests.entity.Candidat;
 import com.gestiontests.entity.CreneauHoraire;
 import com.gestiontests.service.CandidatService;
 import com.gestiontests.service.CreneauHoraireService;
+import com.gestiontests.service.EmailService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -25,6 +26,9 @@ public class CandidatResource {
     
     @Inject
     private CreneauHoraireService creneauHoraireService;
+    
+    @Inject
+    private EmailService emailService;
     
     @POST
     @Path("/inscription")
@@ -228,5 +232,61 @@ public class CandidatResource {
     public Response getCreneauxDisponibles() {
         List<CreneauHoraire> creneaux = creneauHoraireService.findAvailableCreneaux();
         return Response.ok(Map.of("creneaux", creneaux)).build();
+    }
+    
+    @POST
+    @Path("/envoyer-code-session")
+    public Response envoyerCodeSession(Map<String, Object> payload) {
+        try {
+            String email = (String) payload.get("email");
+            if (email == null || email.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("error", "L'adresse email est obligatoire"))
+                    .build();
+            }
+            
+            // Trouver le candidat par email
+            Optional<Candidat> candidatOpt = candidatService.findByEmail(email);
+            if (candidatOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "Aucun candidat trouvé avec cette adresse email"))
+                    .build();
+            }
+            
+            Candidat candidat = candidatOpt.get();
+            if (candidat.getCodeSession() == null || candidat.getCodeSession().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("error", "Aucun code de session disponible pour ce candidat"))
+                    .build();
+            }
+            
+            // Envoyer l'email avec le code de session
+            String sujet = "Votre code de session pour le test en ligne";
+            String contenu = String.format(
+                "Bonjour %s %s,\n\n" +
+                "Voici votre code de session pour passer le test :\n\n" +
+                "🔑 Code de session : %s\n\n" +
+                "Utilisez ce code sur la plateforme de test pour commencer votre évaluation.\n\n" +
+                "Cordialement,\n" +
+                "L'équipe de gestion des tests",
+                candidat.getPrenom(),
+                candidat.getNom(),
+                candidat.getCodeSession()
+            );
+            
+            emailService.envoyerEmailGeneric(email, sujet, contenu);
+            
+            return Response.ok(Map.of(
+                "message", "Code de session envoyé avec succès à " + email,
+                "codeSession", candidat.getCodeSession()
+            )).build();
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'envoi du code de session: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(Map.of("error", "Erreur lors de l'envoi de l'email: " + e.getMessage()))
+                .build();
+        }
     }
 }

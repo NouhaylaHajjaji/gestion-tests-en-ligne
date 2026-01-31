@@ -1,22 +1,22 @@
 package com.gestiontests.service;
 
-
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import com.gestiontests.entity.Candidat;
 import com.gestiontests.entity.CreneauHoraire;
 
-
 import jakarta.enterprise.context.ApplicationScoped;
-
+import jakarta.inject.Inject;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 
 @ApplicationScoped
 public class EmailService {
@@ -24,24 +24,24 @@ public class EmailService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    // Identifiants SMTP (à sécuriser via variables d'environnement dans un vrai projet)
-    private final String username = "fatimazahraessad@gmail.com";
-    private final String password = "hbmi rwex oskb qyii"; // mot de passe d'application Gmail
+    // Configuration SMTP en mode simulation pour éviter les problèmes de déploiement
+    private final boolean SIMULATION_MODE = true;
     
-    // Configuration alternative pour les réseaux bloqués
-    private final boolean USE_ALTERNATIVE_SMTP = true; // Mettre à false si Gmail fonctionne
-    private final boolean SIMULATION_MODE = true; // Mode simulation pour contourner le blocage réseau
-    
-    // Configuration SMTP alternative (ex: SendGrid, Mailgun, ou autre)
-    private final String altUsername = "apikey"; // Pour SendGrid
-    private final String altPassword = "VOTRE_API_KEY_SENDGRID"; // À configurer
-    private final String altHost = "smtp.sendgrid.net";
-    private final String altPort = "587";
+    // Identifiants SMTP (désactivés en mode simulation)
+    private final String username = "gestiontests2024@gmail.com";
+    private final String password = "testapp123";
 
     /** Envoi email après inscription */
     public void envoyerEmailInscription(Candidat candidat, CreneauHoraire creneau, String messageInfo) throws Exception {
         String sujet = "Confirmation d'inscription - Test en ligne";
         String contenu = construireContenuInscription(candidat, creneau, messageInfo);
+        
+        if (SIMULATION_MODE) {
+            System.out.println("📧 [SIMULATION] Email d'inscription pour: " + candidat.getEmail());
+            System.out.println("📧 [SIMULATION] Sujet: " + sujet);
+            System.out.println("📧 [SIMULATION] Code session: " + candidat.getCodeSession());
+            return;
+        }
 
         envoyerEmail(candidat.getEmail(), sujet, contenu);
     }
@@ -50,6 +50,13 @@ public class EmailService {
     public void envoyerEmailValidation(Candidat candidat) throws Exception {
         String sujet = "Validation de votre inscription - Code de session";
         String contenu = construireContenuValidation(candidat);
+        
+        if (SIMULATION_MODE) {
+            System.out.println("📧 [SIMULATION] Email de validation pour: " + candidat.getEmail());
+            System.out.println("📧 [SIMULATION] Sujet: " + sujet);
+            System.out.println("📧 [SIMULATION] Code session: " + candidat.getCodeSession());
+            return;
+        }
 
         envoyerEmail(candidat.getEmail(), sujet, contenu);
     }
@@ -58,6 +65,13 @@ public class EmailService {
     public void envoyerEmailResultats(Candidat candidat, String score, String pourcentage) throws Exception {
         String sujet = "Résultats de votre test en ligne";
         String contenu = construireContenuResultats(candidat, score, pourcentage);
+        
+        if (SIMULATION_MODE) {
+            System.out.println("📧 [SIMULATION] Email de résultats pour: " + candidat.getEmail());
+            System.out.println("📧 [SIMULATION] Sujet: " + sujet);
+            System.out.println("📧 [SIMULATION] Score: " + score + " (" + pourcentage + "%)");
+            return;
+        }
 
         envoyerEmail(candidat.getEmail(), sujet, contenu);
     }
@@ -67,11 +81,23 @@ public class EmailService {
         String sujet = "Votre code de session pour le test en ligne";
         String contenu = construireContenuCodeSession(prenom, codeSession);
         
+        if (SIMULATION_MODE) {
+            System.out.println("📧 [SIMULATION] Email de code session pour: " + email);
+            System.out.println("📧 [SIMULATION] Sujet: " + sujet);
+            System.out.println("📧 [SIMULATION] Code: " + codeSession);
+            return;
+        }
+        
         envoyerEmail(email, sujet, contenu);
     }
 
     /** Test de connexion SMTP */
     public boolean testerConnexionSMTP() {
+        if (SIMULATION_MODE) {
+            System.out.println("📧 [SIMULATION] Mode simulation activé - test SMTP bypassé");
+            return true;
+        }
+        
         try {
             Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
@@ -81,12 +107,7 @@ public class EmailService {
             props.put("mail.smtp.timeout", "10000"); // 10 secondes timeout
             props.put("mail.smtp.connectiontimeout", "10000"); // 10 secondes timeout connexion
 
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(username, password);
-                }
-            });
+            Session session = Session.getInstance(props, new SMTPAuthenticator());
 
             // Tenter de se connecter sans envoyer d'email
             session.getTransport().connect();
@@ -118,12 +139,7 @@ public class EmailService {
             props.put("mail.smtp.timeout", "10000");
             props.put("mail.smtp.connectiontimeout", "10000");
 
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(username, password);
-                }
-            });
+            Session session = Session.getInstance(props, new SMTPAuthenticator());
 
             session.getTransport().connect();
             System.out.println("✅ Connexion SMTP SSL réussie (port 465)");
@@ -441,5 +457,66 @@ public class EmailService {
         html.append("</div></body></html>");
         
         return html.toString();
+    }
+    
+    /**
+     * Envoie un email générique avec sujet et contenu personnalisés
+     */
+    public void envoyerEmailGeneric(String destinataire, String sujet, String contenu) {
+        if (SIMULATION_MODE) {
+            System.out.println("📧 [SIMULATION] Email générique envoyé à: " + destinataire);
+            System.out.println("📧 [SIMULATION] Sujet: " + sujet);
+            System.out.println("📧 [SIMULATION] Contenu: " + contenu);
+            return;
+        }
+        
+        try {
+            // Utiliser la méthode existante envoyerEmail pour éviter les dépendances complexes
+            String contenuHtml = createGenericEmailHtml(sujet, contenu);
+            envoyerEmail(destinataire, sujet, contenuHtml);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de l'envoi de l'email générique: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Crée le contenu HTML pour un email générique
+     */
+    private String createGenericEmailHtml(String sujet, String contenu) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html><head><meta charset='UTF-8'>");
+        html.append("<title>").append(sujet).append("</title>");
+        html.append("<style>");
+        html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }");
+        html.append(".container { max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }");
+        html.append(".header { text-align: center; margin-bottom: 30px; }");
+        html.append(".header h1 { color: #2c3e50; margin: 0; }");
+        html.append(".content { line-height: 1.6; color: #34495e; white-space: pre-wrap; }");
+        html.append(".footer { margin-top: 30px; text-align: center; color: #7f8c8d; font-size: 12px; }");
+        html.append("</style></head><body>");
+        html.append("<div class='container'>");
+        html.append("<div class='header'>");
+        html.append("<h1>📧 ").append(sujet).append("</h1>");
+        html.append("</div>");
+        html.append("<div class='content'>");
+        html.append(contenu.replace("\n", "<br>"));
+        html.append("</div>");
+        html.append("<div class='footer'>");
+        html.append("<p>&copy; 2024 - Système de Gestion des Tests en Ligne</p>");
+        html.append("</div>");
+        html.append("</div></body></html>");
+        
+        return html.toString();
+    }
+    
+    /** Classe statique pour l'authentification SMTP (évite les classes anonymes) */
+    private static class SMTPAuthenticator extends Authenticator {
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication("gestiontests2024@gmail.com", "testapp123");
+        }
     }
 }

@@ -154,13 +154,50 @@ const Test = () => {
     }));
   };
 
-  const nextQuestion = () => {
+  const saveAnswer = async (questionId) => {
+    const answer = answers[questionId];
+    if (!answer || !session) return;
+
+    try {
+      const response = await fetch('/api/tests/reponse', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: session.id,
+          questionId,
+          reponseData: answer
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Réponse sauvegardée automatiquement');
+      } else {
+        console.error('Erreur sauvegarde réponse:', await response.text());
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde réponse:', error);
+    }
+  };
+
+  const nextQuestion = async () => {
+    // Sauvegarder la réponse actuelle avant de changer
+    if (currentQuestion) {
+      await saveAnswer(currentQuestion.id);
+    }
+    
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
 
-  const previousQuestion = () => {
+  const previousQuestion = async () => {
+    // Sauvegarder la réponse actuelle avant de changer
+    if (currentQuestion) {
+      await saveAnswer(currentQuestion.id);
+    }
+    
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
@@ -279,44 +316,23 @@ const Test = () => {
                 <label
                   key={reponse.id}
                   className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:bg-gray-50 ${
-                    answers[currentQuestion.id] === reponse.id
+                    answers[currentQuestion.id]?.reponsePossibleId === reponse.id
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200'
                   }`}
                 >
                   <input
-                    type={
-                      currentQuestion.typeQuestion?.nom === 'MULTIPLE'
-                        ? 'checkbox'
-                        : 'radio'
-                    }
+                    type="radio"
                     name={`question-${currentQuestion.id}`}
-                    checked={
-                      currentQuestion.typeQuestion?.nom === 'MULTIPLE'
-                        ? Array.isArray(answers[currentQuestion.id]) && 
-                          answers[currentQuestion.id].includes(reponse.id)
-                        : answers[currentQuestion.id] === reponse.id
-                    }
+                    checked={answers[currentQuestion.id]?.reponsePossibleId === reponse.id}
                     onChange={(e) => {
-                      if (currentQuestion.typeQuestion?.nom === 'MULTIPLE') {
-                        const currentAnswers = Array.isArray(answers[currentQuestion.id])
-                          ? answers[currentQuestion.id]
-                          : [];
-                        if (e.target.checked) {
-                          setAnswers({
-                            ...answers,
-                            [currentQuestion.id]: [...currentAnswers, reponse.id]
-                          });
-                        } else {
-                          setAnswers({
-                            ...answers,
-                            [currentQuestion.id]: currentAnswers.filter(id => id !== reponse.id)
-                          });
-                        }
-                      } else {
+                      if (e.target.checked) {
                         setAnswers({
                           ...answers,
-                          [currentQuestion.id]: reponse.id
+                          [currentQuestion.id]: {
+                            reponsePossibleId: reponse.id,
+                            reponseText: null
+                          }
                         });
                       }
                     }}
@@ -327,15 +343,30 @@ const Test = () => {
               ))}
             </div>
 
-            {currentQuestion.typeQuestion?.nom === 'TEXTE' && (
+            {/* Zone de réponse textuelle - disponible pour toutes les questions */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ou écrivez votre réponse détaillée :
+              </label>
               <textarea
-                className="input mt-4"
+                className="input w-full"
                 rows={4}
-                placeholder="Tapez votre réponse ici..."
-                value={answers[currentQuestion.id] || ''}
-                onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
+                placeholder="Tapez votre réponse ici si aucune des options ci-dessus ne vous convient..."
+                value={answers[currentQuestion.id]?.reponseText || ''}
+                onChange={(e) => {
+                  setAnswers({
+                    ...answers,
+                    [currentQuestion.id]: {
+                      reponseText: e.target.value,
+                      reponsePossibleId: null
+                    }
+                  });
+                }}
               />
-            )}
+              <p className="text-xs text-gray-500 mt-2">
+                💡 Les réponses textuelles sont évaluées automatiquement par comparaison avec les réponses correctes
+              </p>
+            </div>
           </div>
         )}
 
