@@ -30,9 +30,6 @@ yarn-error.log*
 
 *.uml
 
-
-.md
-
 # OS
 .DS_Store
 .DS_Store?
