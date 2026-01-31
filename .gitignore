@@ -28,6 +28,8 @@ yarn-error.log*
 *.swo
 *~
 
+*.uml
+
 # OS
 .DS_Store
 .DS_Store?

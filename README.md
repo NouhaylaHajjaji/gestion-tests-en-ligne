@@ -140,14 +140,6 @@ gestion/
 - **3 couches** d'architecture (Entity, Service, API)
 - **6 composants** de déploiement
 
-## 👨‍💻 Auteurs
-
-Développé dans le cadre d'un projet académique de gestion des tests en ligne.
-
-## 📄 Licence
-
-Ce projet est sous licence académique.
-
 ---
 
 **Note** : Ce projet a été déployé et testé avec succès sur WildFly 27 avec MySQL 8.0.
@@ -175,32 +167,6 @@ Ce projet est sous licence académique.
 │   ├── schema.sql
 │   └── data.sql
 └── README.md
-```
-
-## Installation
-1. Configurer XAMPP avec MySQL
-2. Importer le schéma de la base de données
-3. Démarrer le backend Jakarta EE
-4. Démarrer l'application React
-
-## Démarrage rapide
-
-### Backend (Jakarta EE)
-1. Assurez-vous d'avoir WildFly ou Payara installé
-2. Déployez le fichier WAR généré par Maven
-3. Configurez la base de données MySQL avec les scripts dans `database/`
-
-### Frontend (React)
-```bash
-cd frontend
-npm install
-npm start
-```
-
-### Base de données
-```bash
-mysql -u root -p < database/schema.sql
-mysql -u root -p < database/data.sql
 ```
 
 ## Fonctionnalités principales
