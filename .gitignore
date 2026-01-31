@@ -76,3 +76,12 @@ xampp/logs/
 docs/generated/
 *.pdf
 *.docx
+
+# Diagrammes UML (masqués du dépôt)
+*.uml
+diagrammes/*.png
+diagrammes/*.svg
+diagrammes/*.jpg
+diagrammes/*.jpeg
+!README.md
+!SCRIPT_VIDEO.md
