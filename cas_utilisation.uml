@@ -1,0 +1,64 @@
+@startuml
+!theme plain
+skinparam actorStyle awesome
+
+left to right direction
+actor "Candidat" as Candidat #lightblue
+actor "Administrateur" as Admin #lightgreen
+rectangle "Système de Gestion des Tests" as System #lightyellow
+
+' Cas d'utilisation du Candidat
+Candidat -- (S'inscrire à la plateforme) as UC1
+Candidat -- (Se connecter) as UC2
+Candidat -- (Choisir un créneau horaire) as UC3
+Candidat -- (Passer un test en ligne) as UC4
+Candidat -- (Voir ses résultats) as UC5
+Candidat -- (Recevoir code de session) as UC6
+Candidat -- (Consulter son profil) as UC7
+
+' Cas d'utilisation de l'Administrateur
+Admin -- (Gérer les candidats) as UC8
+Admin -- (Valider les inscriptions) as UC9
+Admin -- (Rejeter les candidatures) as UC10
+Admin -- (Envoyer codes de session) as UC11
+Admin -- (Gérer les questions) as UC12
+Admin -- (Créer des thèmes de test) as UC13
+Admin -- (Définir les créneaux horaires) as UC14
+Admin -- (Voir les statistiques) as UC15
+Admin -- (Gérer les résultats) as UC16
+Admin -- (Configurer les paramètres) as UC17
+Admin -- (Se connecter à l'admin) as UC18
+
+' Relations d'héritage et d'extension
+(Se connecter) .> (S'inscrire à la plateforme) : <<extend>>
+(Choisir un créneau horaire) .> (S'inscrire à la plateforme) : <<extend>>
+(Passer un test en ligne) .> (Se connecter) : <<include>>
+(Voir ses résultats) .> (Passer un test en ligne) : <<extend>>
+(Recevoir code de session) .> (Valider les inscriptions) : <<include>>
+
+' Relations d'inclusion pour l'administrateur
+(Gérer les candidats) .> (Valider les inscriptions) : <<include>>
+(Gérer les candidats) .> (Rejeter les candidatures) : <<include>>
+(Gérer les candidats) .> (Envoyer codes de session) : <<include>>
+(Gérer les questions) .> (Créer des thèmes de test) : <<include>>
+
+' Notes descriptives
+note right of UC1
+  Le candidat remplit le formulaire
+  d'inscription avec ses informations
+  personnelles et académiques
+end note
+
+note right of UC4
+  Le candidat répond aux questions
+  du test avec un timer par question
+  et voit son score en temps réel
+end note
+
+note right of UC12
+  L'administrateur peut ajouter,
+  modifier ou supprimer des questions
+  et définir les bonnes réponses
+end note
+
+@enduml

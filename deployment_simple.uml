@@ -1,0 +1,53 @@
+@startuml
+!theme plain
+
+' Navigateur Client
+node "Navigateur Client" as Browser {
+  [React.js Application]
+  [Chrome/Firefox/Safari]
+}
+
+' Serveur Web
+node "Serveur Apache" as Apache {
+  [Port 80/443]
+  [phpMyAdmin]
+  [Static Files]
+}
+
+' Serveur Frontend
+node "Serveur Frontend" as Frontend {
+  [Node.js Server]
+  [Port 3000]
+  [React Dev Server]
+}
+
+' Serveur Backend
+node "Serveur Backend" as Backend {
+  [WildFly 27]
+  [Port 8080]
+  [Jakarta EE]
+  [REST API]
+}
+
+' Base de données
+database "Base MySQL" as MySQL {
+  [MySQL 8.0]
+  [Port 3306]
+  [gestion_tests DB]
+}
+
+' Service Email
+node "Service Email" as Email {
+  [SMTP Server]
+  [Port 587]
+  [Email Notifications]
+}
+
+' Connexions réseau
+Browser --> Apache : HTTPS/HTTP
+Apache --> Frontend : Proxy
+Frontend --> Backend : API Calls
+Backend --> MySQL : JDBC
+Backend --> Email : SMTP
+
+@enduml

@@ -1,0 +1,125 @@
+@startuml
+!theme plain
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 2
+}
+skinparam database {
+  BorderColor #000000
+  BorderThickness 2
+}
+
+node "Navigateur Client" as Browser #lightblue {
+  [Chrome/Firefox/Safari]
+  [React.js Application]
+  [Tailwind CSS]
+}
+
+node "Serveur Web Apache" as Apache #lightgreen {
+  [Port 80]
+  [Port 443]
+  [phpMyAdmin]
+  [Static Files]
+}
+
+node "Serveur Frontend" as Frontend #lightyellow {
+  [Node.js Server]
+  [Port 3000]
+  [React Development Server]
+}
+
+node "Serveur Backend" as Backend #lightcoral {
+  [WildFly 27]
+  [Port 8080]
+  [Port 9990]
+  [Jakarta EE 10]
+  [JAX-RS API]
+  [JPA/Hibernate]
+}
+
+database "Base de Données MySQL" as MySQL #lightgray {
+  [MySQL Server 8.0]
+  [Port 3306]
+  [gestion_tests DB]
+  [15 Tables]
+}
+
+node "Service Email" as Email #lavender {
+  [SMTP Server]
+  [Port 587]
+  [Email Notifications]
+}
+
+cloud "Internet" as Internet {
+  [DNS]
+  [Firewall]
+  [Load Balancer]
+}
+
+' Connexions réseau
+Browser --> Internet : HTTPS/HTTP
+Internet --> Apache : Port 80/443
+Internet --> Frontend : Port 3000
+Internet --> Backend : Port 8080
+Internet --> MySQL : Port 3306
+
+' Connexions internes
+Apache --> Frontend : Proxy/Redirect
+Frontend --> Backend : API Calls (HTTP/REST)
+Backend --> MySQL : JDBC Connection
+Backend --> Email : SMTP Protocol
+
+' Notes de déploiement
+note right of Browser
+  **Navigateur Requirements**
+  - Chrome 90+ / Firefox 88+ / Safari 14+
+  - JavaScript activé
+  - Cookies activés
+  - Résolution minimale: 1024x768
+end note
+
+note right of Apache
+  **Configuration Apache**
+  - Virtual Host pour phpMyAdmin
+  - Proxy pour frontend React
+  - SSL/TLS Configuration
+  - Static files serving
+end note
+
+note right of Frontend
+  **Frontend Development**
+  - Node.js 16+
+  - React 18+
+  - npm/yarn package manager
+  - Development server mode
+  - Production build optimization
+end note
+
+note right of Backend
+  **Backend Production**
+  - WildFly 27 Application Server
+  - Jakarta EE 10
+  - Java 11+ Runtime
+  - Connection pooling
+  - JNDI Datasource configuration
+end note
+
+note right of MySQL
+  **Database Configuration**
+  - MySQL 8.0 Server
+  - InnoDB Engine
+  - UTF-8 Character Set
+  - Regular backups
+  - Performance tuning
+end note
+
+note right of Email
+  **Email Service**
+  - SMTP Authentication
+  - TLS Encryption
+  - Template management
+  - Delivery tracking
+  - Bounce handling
+end note
+
+@enduml
