@@ -131,37 +131,10 @@ gestion/
 
 ---
 
-**Note** : Ce projet a été déployé et testé avec succès sur WildFly 27 avec MySQL 8.0.
-│   │   │   ├── java/
-│   │   │   │   └── com/gestiontests/
-│   │   │   │       ├── entity/
-│   │   │   │       ├── repository/
-│   │   │   │       ├── service/
-│   │   │   │       ├── rest/
-│   │   │   │       └── config/
-│   │   │   └── resources/
-│   │   └── test/
-│   ├── pom.xml
-│   └── README.md
-├── frontend/               # Application React
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   └── utils/
-│   ├── package.json
-│   └── README.md
-├── database/               # Scripts SQL
-│   ├── schema.sql
-│   └── data.sql
-└── README.md
-```
-
 ## Fonctionnalités principales
 - Inscription des candidats avec validation
 - Gestion des créneaux horaires
 - Tests aléatoires par thème
 - Timer automatique par question
 - Résultats instantanés
-- Interface d'administration complète
+- Interface d'administration 
