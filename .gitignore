@@ -85,5 +85,9 @@ diagrammes/*.png
 diagrammes/*.svg
 diagrammes/*.jpg
 diagrammes/*.jpeg
+
+# Documentation des diagrammes (masquée du dépôt)
+diagramme_*.md
+DIAGRAMMES_*.md
 !README.md
 !SCRIPT_VIDEO.md
