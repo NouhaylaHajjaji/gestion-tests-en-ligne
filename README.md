@@ -53,7 +53,7 @@ Permettre aux candidats de s'inscrire, choisir des créneaux horaires, passer de
 
 ## 🎬 Démo Vidéo
 
-[📹 Lien vers la vidéo explicative](lien-video-ici)
+https://drive.google.com/drive/folders/1D0mnmt_w2PfBFlwwpmgo4bChFLvNQj8s?usp=drive_link
 
 ## 📁 Structure du Projet
 
